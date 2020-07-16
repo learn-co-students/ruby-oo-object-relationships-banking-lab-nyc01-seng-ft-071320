@@ -1,6 +1,5 @@
 require 'pry'
-class Transfer
-
+class Transfer 
   attr_accessor :sender, :receiver, :status, :amount   
   
   @@all = []
@@ -31,13 +30,32 @@ class Transfer
   end
 
   def execute_transaction
-    self.receiver.deposit(@amount)
-    binding.pry
+    if check_validity && sender.balance > self.amount && self.status == "pending"  
+      receiver.balance += amount 
+      sender.balance -= amount
+      self.status = "complete"
+    else
+      rejection
+    end
   end
+ 
   
-  
+  def check_validity
+    self.sender.valid? && self.receiver.valid?
+  end
 
+  def rejection
+    self.status = "rejected"
+    "Transaction rejected. Please check your account balance."
+  end
 
-
-
+  def reverse_transfer 
+    if check_validity && receiver.balance > self.amount && self.status == "complete"
+      receiver.balance -= amount 
+      sender.balance += amount
+      self.status = "reversed"
+    else 
+      rejection
+    end
+  end 
 end
